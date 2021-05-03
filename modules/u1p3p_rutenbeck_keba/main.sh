@@ -17,18 +17,13 @@
 #                           "start"/"stop"  ... TODO ... shall be part of u1p3pcheck.sh in my opinion
 #
 #
-#           $2 ... charge point: "lp0..lp8"
+#           $2 ... charge point: "1..8"
 #
-## Config parameters => todo: move to u1p3pcheck
-#           u1p3p_module_lp0=<module_path>
-#           u1p3p_module_lp1=<module_path>
+## openwb.conf
+#           charge1ip=<IpAddress of rutenbeck>||"none"
+#           charge2ip=<IpAddress of rutenbeck>||"none"
 #           ...
-#           u1p3p_module_lp8=<module_path>
-#
-#           u1p3p_rutenbeck_keba_ip_lp0=<IpAddress of rutenbeck>||"none"
-#           u1p3p_rutenbeck_keba_ip_lp1=<IpAddress of rutenbeck>||"none"
-#           ...
-#           u1p3p_rutenbeck_keba_ip_lp8=<IpAddress of rutenbeck>||"none"
+#           charge8ip=<IpAddress of rutenbeck>||"none"
 #
 #  e.g. for modules/1p3p_rutenbeck_keba/
 #           u1p3p_module_lp0=1p3p_rutenbeck_keba
@@ -39,7 +34,7 @@
 #
 ## constants
 commands=("1" "3")
-chargepoints=("lp0" "lp1" "lp2" "lp3" "lp4" "lp5" "lp6" "lp7" "lp8")
+chargepoints=("1" "2" "3" "4" "5" "6" "7" "8")
 
 rutenbeckPort=30303
 response="none"
@@ -63,7 +58,7 @@ function switchRutenbeck() {
         #do nothing
         :
     else
-        echo "invalid relais number: $relaisNumber"
+        #echo "invalid relais number: $relaisNumber"
         exit 5
     fi
     #check action number
@@ -73,7 +68,7 @@ function switchRutenbeck() {
         #do nothing
         :
     else
-        echo "invalid action number: $actionNumber"
+        #echo "invalid action number: $actionNumber"
         exit 6
     fi
     # send the OUT2 0 command via socat UDP to the IPRelais
@@ -86,7 +81,8 @@ function switchRutenbeck() {
         #do nothing
         :
     else
-        echo "action: $actionNumber failed"
+        #echo "action: $actionNumber failed"
+        #echo "response: $response"
         exit 7
     fi
 }
@@ -95,15 +91,15 @@ function switchRutenbeck() {
 command="invalid"
 chargepoint="invalid"
 
-### input parameter check ###
+## input parameter check ##
 # $1 ... command
 if [[ " "${commands[@]}" " == *" "$1" "* ]]
 then
     #echo "command valid"
     command=$1
 else
-    echo "Invalid command: $1. Valid values are:"
-    echo "${commands[@]/%/,}"
+    #echo "Invalid command: $1. Valid values are:"
+    #echo "${commands[@]/%/,}"
 
     # exit with invalid first input parameter
     exit 1
@@ -115,30 +111,30 @@ then
     #echo "chargepoint valid"
     chargepoint=$2
 else
-    echo "Invalid chargepoint $2. Valid values are:"
-    echo "${chargepoints[@]/%/,}"
+    #echo "Invalid chargepoint $2. Valid values are:"
+    #echo "${chargepoints[@]/%/,}"
 
     # exit with invalid second input parameter
     exit 2
 fi
-#test begin
-u1p3p_rutenbeck_keba_ip_lp0="192.168.15.18"
-#u1p3p_rutenbeck_keba_ip_lp0="1.2.3.4"
+#test begin - set config
+#chargep1ip="192.168.15.18"
+#charge1ip="1.2.3.4"
 #test end
 
-### check chargeoint ip config parameter ###
+## check chargeoint ip config parameter ##
 # concatenate config variable name
-chargepoint_ip_variable="u1p3p_rutenbeck_keba_ip_$chargepoint"
+chargepoint_ip_variable="chargep${chargepoint}ip"
 #echo "rutenbeck chargepoint ip: $chargepoint_ip_variable"
 
 # read config variable
 ipAddress=${!chargepoint_ip_variable}
 #echo "ipAddress=$ipAddress"
 
-# check config variable
+# check ip variable
 if [ -z "$ipAddress" ] || [ "none" == "$ipAddress" ]
 then
-    echo "IpAddress empty or not configured: $ipAddress"
+    #echo "IpAddress empty or not configured: $ipAddress"
     # exit ip empty or "none"
     exit 3
 fi
@@ -150,15 +146,15 @@ then
     #do nothing
     :
 else
-    echo "ip address is invalid: $ipAddress"
+    #echo "ip address is invalid: $ipAddress"
     # exit ip address failed syntax check
     exit 4
 fi
 
-### process command ###
+## process command ##
 case $command in
     "1")
-        echo "switch to 1 phase"
+        #echo "switch to 1 phase"
         # open X1 on KEBA - block charging
         switchRutenbeck $relaisKebaX1 0
         sleep 1
@@ -169,7 +165,7 @@ case $command in
         switchRutenbeck $relaisKebaX1 1
     ;;
     "3")
-        echo "switch to 3 phases"
+        #echo "switch to 3 phases"
         # open X1 on KEBA - block charging
         switchRutenbeck $relaisKebaX1 0
         sleep 1
@@ -181,10 +177,12 @@ case $command in
     ;;
     *)
     # should not happen because of input parameter check
-    echo "invalid command"
-    exit 1
+    #echo "invalid command"
+    exit 5
     ;;
 esac
+
+exit 0
 
 
 
