@@ -9,11 +9,18 @@ echo "Active:    1, $u1p3plp2aktiv, $u1p3plp3aktiv, $u1p3plp4aktiv, $u1p3plp5akt
 #echo "evsecons1=$evsecons1"
 # change to 1 phases
 if [[ "$1" == "1" ]]; then
-	# chargepoint 1
+	# Modbus - chargepoint 1
 	if [[ $evsecon == "modbusevse" ]]; then
 		openwbDebugLog "MAIN" 0 "Pause nach Umschaltung: ${u1p3ppause}s"
 		sudo python runs/trigopen.py -d $u1p3ppause -c 1
 	fi
+
+	# Modbus - chargepoint 2
+	if [[ $lastmanagement == 1 && $evsecons1 == "modbusevse" && $u1p3plp2aktiv == "1" ]]; then
+		openwbDebugLog "MAIN" 0 "Pause nach Umschaltung: ${u1p3ppause}s"
+		sudo python runs/trigopen.py -d $u1p3ppause -c 2
+	fi
+
 	if [[ $evsecon == "ipevse" ]]; then
 		sudo python runs/u1p3premote.py -a $evseiplp1 -i $u1p3plp2id -p 1 -d $u1p3ppause
 	fi
@@ -42,11 +49,7 @@ if [[ "$1" == "1" ]]; then
 		mosquitto_pub -r -t openWB/set/isss/U1p3p -h $chargep8ip -m "1"
 	fi
 
-	# chargepoint 2
-	if [[ $lastmanagement == 1 && $evsecons1 == "modbusevse" && $u1p3plp2aktiv == "1" ]]; then
-		openwbDebugLog "MAIN" 0 "Pause nach Umschaltung: ${u1p3ppause}s"
-		sudo python runs/trigopen.py -d $u1p3ppause -c 2
-	fi
+
 	if [[ $lastmanagement == 1 && $evsecons1 == "ipevse" && $u1p3plp2aktiv == "1" ]]; then
 		sudo python runs/u1p3premote.py -a $evseiplp2 -i $u1p3plp2id -p 1 -d $u1p3ppause
 	fi

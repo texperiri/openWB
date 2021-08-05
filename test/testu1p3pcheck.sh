@@ -113,14 +113,24 @@ prepareModbusEvse() {
       if [ $chargepoint -eq 0 ]
       then
         writeExpectedCall "openwbDebugLog MAIN 0 Pause nach Umschaltung: 2s"
-        writeExpectedCall "sudo python runs/trigopen.py -d 2"
+        writeExpectedCall "sudo python runs/trigopen.py -d 2 -c 1"
+      fi
+      if ( [ $chargepoint -eq 1 ] && [ $loadmgmt -eq 1 ] && [ $active -eq 1 ] )
+      then
+        writeExpectedCall "openwbDebugLog MAIN 0 Pause nach Umschaltung: 2s"
+        writeExpectedCall "sudo python runs/trigopen.py -d 2 -c 2"
       fi
       ;;
     "3")
       if [ $chargepoint -eq 0 ]
       then
         writeExpectedCall "openwbDebugLog MAIN 0 Pause nach Umschaltung: 2s"
-        writeExpectedCall "sudo python runs/trigclose.py -d 2"
+        writeExpectedCall "sudo python runs/trigclose.py -d 2 -c 1"
+      fi
+      if ( [ $chargepoint -eq 1 ] && [ $loadmgmt -eq 1 ] && [ $active -eq 1 ] )
+      then
+        writeExpectedCall "openwbDebugLog MAIN 0 Pause nach Umschaltung: 2s"
+        writeExpectedCall "sudo python runs/trigclose.py -d 2 -c 2"
       fi
       ;;
     "stop")
